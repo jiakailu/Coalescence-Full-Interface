@@ -172,7 +172,7 @@ C       the first four time steps.
 	RMU=1.0D-03
 	SIGMA=0.02					
         WE=1.0d+00						! jet
-	Re=312.5
+	Re=10
         IWRIT=0
           ITRACK=1
 	pn=1
@@ -266,18 +266,18 @@ C         c)b.c. at x=0, u=0, !Jet Impingement
           DO I=1,NNYZ1,1
 c	  DO I=1,(NNY+1)*(NNX1-1)+1,NNY+1	!regular JetJet
 c	  DO I=1,NNY,1	
-	  SOL(NOPP(I))=0.
-	  NCOD(NOPP(I))=1
-c	  SOL(NOPP(I)+1)=0.
-c	  NCOD(NOPP(I)+1)=1
+c	  SOL(NOPP(I))=0.
+c	  NCOD(NOPP(I))=1
+	  SOL(NOPP(I)+1)=0. !CFI
+	  NCOD(NOPP(I)+1)=1 !CFI
 	  END DO  	!JK 02-11-2013 test sheet half
 
           DO I=NNXZ1*(NNYZ1+1)+1,NNXZ1*(NNYZ1+1)
      1         +(NNY+1)*(NNX1-2)+1,NNY+1
-	  SOL(NOPP(I))=0.
-	  NCOD(NOPP(I))=1
-c	  SOL(NOPP(I)+1)=0.
-c	  NCOD(NOPP(I)+1)=1
+c	  SOL(NOPP(I))=0.
+c	  NCOD(NOPP(I))=1
+	  SOL(NOPP(I)+1)=0.  !CFI
+	  NCOD(NOPP(I)+1)=1  !CFI
 	  END DO  	!JK 02-11-2013 test sheet half
 
 c	  d)b.c. at y=yw 
@@ -289,7 +289,7 @@ c          END DO
 
 c	  e)b.c. fix nozzel h 		! jet on wall
 c        sol(nopp(nhadd))=1.
-        ncod(nopp(nhadd))=1
+c        ncod(nopp(nhadd))=1 !CFI
 	if(ifs .eq. 0)then
 	do i=1,nhadd
         if(MDF(i).eq.1)then
@@ -376,7 +376,7 @@ c        end if
         end do
          solv(NP+1)=sol(NP+1)   !JK-artificial moving front
 c         sol(NP+1)=solv(NP+1)+stept*dsol(NP+1)  !JK-artifical moving front
-          sol(NP+1)=-stept*solv(nopp(nnyz1)+1)+solv(NP+1)
+          sol(NP+1)=-stept*solv(nopp(nnyz1))+solv(NP+1) !CFI
         END IF
         IF(NTIME .GE. 2 .AND .NTIME .LT. 5)THEN
         ct1=1.
@@ -411,7 +411,7 @@ c         sol(NP+1)=solv(NP+1)+stept*dsol(NP+1)  !JK-artifical moving front
          dsol(NP+1)=(sol(NP+1)-solv(NP+1))/stept  !JK-artificial moving front
          temp=solv(NP+1)  !JK-artificial moving front
          solv(NP+1)=sol(NP+1)  !JK-artificial moving front
-          sol(NP+1)=-stept*solv(nopp(nnyz1)+1)+solv(NP+1)
+          sol(NP+1)=-stept*solv(nopp(nnyz1))+solv(NP+1) !CFI
 c         sol(NP+1)=2.*solv(NP+1)-temp  !JK-artificial moving front
 c          sol(NP+1)=stept*solv(nopp(nnyz1)+1)+solv(NP+1)
 c          sol(NP+1)=-stept*solv(nopp(nnyz1)+1)+solv(NP+1)
@@ -505,7 +505,7 @@ c        end if
 	end if				!JK max timestep
        
         vdel(int)=stept
-         coe1=solv(nopp(nnyz1)+1)   !coe
+         coe1=solv(nopp(nnyz1))   !coe
         do i=1,nhadd
         k=nopp(i)
          if(mdf(i) .ne. 1)then
@@ -538,14 +538,15 @@ c        end if
           h(kh)=sol(k)
          end if
         end do
+cccccccccccccccc  CFI  ccccccccccccccccccccccccccc
           if(ioa .ne. 1)then
           dsolv(NP+1)=dsol(NP+1)!JK-artificial moving front
           dsol(NP+1)=2./steptv*(sol(NP+1)-solv(NP+1))-dsolv(NP+1)!JK-artificial moving front
           solv(NP+1)=sol(NP+1)!JK-artificial moving front
           end if
           
-          coe=solv(nopp(nnyz1)+1)/coe1
-         if (solv(nopp(nnyz1)+1).GT.0) then
+          coe=solv(nopp(nnyz1))/coe1
+         if (solv(nopp(nnyz1)).GT.0) then
           if(solv(nopp(nnyz1+1)).GE.0.8*0.2.AND.solv(nopp(nnyz1
      1     +1)).LE.1.2*0.2) then
           coe=coe
@@ -564,11 +565,12 @@ c        end if
           coe=1.2*coe
           end if
          end if
-          sol(NP+1)=-coe*stept*solv(nopp(nnyz1)+1)+solv(NP+1)
+          sol(NP+1)=-coe*stept*solv(nopp(nnyz1))+solv(NP+1)
 c          sol(NP+1)=solv(NP+1)+stept/2.*((2.+steptv/stept)*dsol(NP+1)-!JK-artificial moving front
 c     1              steptv/stept*dsolv(NP+1))!JK-artificial moving front
           solp(NP+1)=sol(NP+1)!JK-artificial moving front
         END IF
+ccccccccccccccccc CFI ccccccccccccccccccccccccccccccc
 	TIME=TIME+STEPT
 
 cccccccccccc  Defining the Inlet Velocity BC ccccccccccccccccc
@@ -1009,7 +1011,7 @@ c        WRITE(18,4)NH,NHADD,NP
 	Else
          DO I=1,NNX
           Read(129,*)wx(i)
-          wx(i)=wx(i)+0.3
+c          wx(i)=wx(i)+0.3
          END DO
 	END IF
         IF(Npatterny.eq.1)then
@@ -1282,18 +1284,22 @@ C 	Last modification 09-may-98
         COMMON/GEN1/SOL(15999),W1(9),W2(9),W5(9),W3(4),W4(3)
 C       Base points      
         DO I=1,NNXZ1
-          BCP(I,1)=wxz(i)
-c          BCP(I,2)=-sol(nopp(NNYZ1+1))+wx(NEMX*2+3)
-c          BCP(I,2)=-sol(NP+1)+wx(NEMX*2+3)
-          BCP(I,2)=-sol(NP+1)+wx(NNX1)
+c          BCP(I,1)=wxz(i)
+c          BCP(I,2)=-sol(NP+1)+wx(NNX1)
+          BCP(I,2)=wxz(i) !CFI
+          BCP(I,1)=-sol(NP+1)+wx(NNX1) !CFI
         END DO   
  
         DO I=1,NNX1-1
           j=I+NNXZ1
-	  BCP(j,2)=-(wx(I+1)-wx(NNX1))*
-     1    sol(NP+1)/(wx(1)-wx(NNX1))
+c	  BCP(j,2)=-(wx(I+1)-wx(NNX1))*
+c     1    sol(NP+1)/(wx(1)-wx(NNX1))
+c     2    +wx(NNX1)
+c	  BCP(j,1)=0.0d0				! JK_mesh
+	  BCP(j,1)=-(-wx(I+1)+wx(NNX1))*
+     1    sol(NP+1)/(-wx(1)+wx(NNX1))
      2    +wx(NNX1)
-	  BCP(j,1)=0.0d0				! JK_mesh
+	  BCP(j,2)=0.0d0				! CFI 
         END DO
 
 	DO I=1,NNX2
@@ -1313,17 +1319,25 @@ C       Mesh coordinates
 	DO I=2,NNX
 	  DO J=1,NNXZ1
 	    NODO=(NNY+1)*(I-2)+J+NNXZ1*(NNYZ1+1)
-	    XPT(NODO)=BCP(I+NNXZ1-1,1) 
-     1       + wxz(NNXZ1)*(wxz(j)/wxz(NNXZ1))         ! JK_new_mesh
-	    YPT(NODO)=BCP(I+NNXZ1-1,2)! JK_new_mesh
+c	    XPT(NODO)=BCP(I+NNXZ1-1,1) 
+c     1       + wxz(NNXZ1)*(wxz(j)/wxz(NNXZ1))         ! JK_new_mesh
+c	    YPT(NODO)=BCP(I+NNXZ1-1,2)! JK_new_mesh
+	    YPT(NODO)=BCP(I+NNXZ1-1,2) 
+     1       + wxz(NNXZ1)*(wxz(j)/wxz(NNXZ1))         ! CFI
+	    XPT(NODO)=BCP(I+NNXZ1-1,1)! CFI
 	  END DO
 	  DO J=NNXZ1+1,NNY
 	    NODO=(NNY+1)*(I-2)+J+NNXZ1*(NNYZ1+1)
-	    XPT(NODO)=BCP(I+NNXZ1-1,1)
-     1     + wxz(NNXZ1)
-     2     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,1)          ! JK_new_mesh
-	    YPT(NODO)=BCP(I+NNXZ1-1,2) 
-     1     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,2)	! JK_new_mesh
+c	    XPT(NODO)=BCP(I+NNXZ1-1,1)
+c     1     + wxz(NNXZ1)
+c     2     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,1)          ! JK_new_mesh
+c	    YPT(NODO)=BCP(I+NNXZ1-1,2) 
+c     1     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,2)	! JK_new_mesh
+	    XPT(NODO)=BCP(I+NNXZ1-1,1)   !CFI
+     1     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,1)          !CFI
+	    YPT(NODO)=BCP(I+NNXZ1-1,2) !CFI
+     1     + wxz(NNXZ1)   !CFI
+     2     + H(I+NNXZ1-1)*WY(J-NNXZ1+1)*DIR(I+NNXZ1-1,2)	! CFI
 	  END DO
 	END DO        
 85      FORMAT(10X,' NODE:',I4,' XPT(I):',E20.10,' YPT(I):',E20.10)
@@ -1416,9 +1430,12 @@ c          rs=rs+SLvis(W5(i))*PHI(I)
 	END DO	
         DO K=1,3
           DO L=1,3
-            dyt1=dyt1-phi(3*(l-1)+k)*wxl(k)*(sol(NP+1)
+            dxt1=dxt1-phi(3*(l-1)+k)*wxl(k)*(sol(NP+1)
      & 	    -solv(NP+1)) 				
-            dyt2=dyt2-phi(3*(l-1)+k)*wxl(k)*dsol(NP+1)	
+            dxt2=dxt2-phi(3*(l-1)+k)*wxl(k)*dsol(NP+1)	
+c            dyt1=dyt1-phi(3*(l-1)+k)*wxl(k)*(sol(NP+1)
+c     & 	    -solv(NP+1)) 				
+c            dyt2=dyt2-phi(3*(l-1)+k)*wxl(k)*dsol(NP+1)	
 	  END DO					
 	END DO
 	RETURN
@@ -1942,8 +1959,10 @@ C     Assigning Global Equation Number to Local Numbering Vector
           wyl(i)=wxz(2*(irow-1)+i)     ! Local Proportionality 
 c          dirl(i,1)=dir((icol*2)+i+NNXZ1-1,1)     ! Cos for the local spine with respect to z coor. 
 c          dirl(i,2)=dir((icol*2)+i+NNXZ1-1,2)     ! Sin for the local spine with respect to z coor.
-          dirl(i,1)=-1.    ! Cos for the local spine with respect to z coor. 
-          dirl(i,2)=0.    ! Sin for the local spine with respect to z coor.
+c          dirl(i,1)=-1.    ! Cos for the local spine with respect to z coor. 
+c          dirl(i,2)=0.    ! Sin for the local spine with respect to z coor.
+          dirl(i,1)=0.    ! Cos for the local spine with respect to z coor. 
+          dirl(i,2)=1.    ! Sin for the local spine with respect to z coor.
         End Do
 
 C     Local Residual Vector and Jacobian Matrix
