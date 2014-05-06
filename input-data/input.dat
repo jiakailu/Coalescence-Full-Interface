@@ -1,1 +1,18 @@
-x
+0.0000001     !time ste
+50000000        !final time
+0.1      !epsil for time
+1        !If the surface is free(1->free 0->Fixed)
+10       !steps of newton iterations(1->1 step newton is appied else->full)
+0        !initial value of time(0->starting from time 0 !no other values are allowed)
+0.1      !epsil
+30       !number of x1 elements
+0        !number of x2 elements
+14       !number of y elements
+4        !xw
+17       !yw
+1e-5     !error at which the Newton Method converges Rmsmax
+10       !Maximum iteration of Newton Method
+2      !Npatternx for node distribution in x-direction (1->uniform, 2->read from input "xcoor.dat")
+2      !Npatterny for node distribution in y-direction (1->uniform, 2->read from input "ycoor.dat")
+5
+
