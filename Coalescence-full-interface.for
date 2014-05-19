@@ -117,12 +117,12 @@ C   *******************************************************************
 	COMMON/MESCO/YPT(7011),XPT(7011)
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2			!JK_new_mesh
 	COMMON/MESHCON/NEY,NEX,NEX1,NEX2		!JK_new_mesh
-        COMMON/MESHWT/WY(41),WX(171)			
+        COMMON/MESHWT/WY(41),WX(180)			
 	COMMON/PARAM/RE,F,OME,WE
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/TEMP2/SOLV(15999),DSOL(15999)
 	COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME  !moidified for continuation run: JK
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh 
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh 
         common/temf/solp(15999)
 c        common/test/TESM(22,22),r2tes(22)
         common/init/epsilon,wno
@@ -172,7 +172,7 @@ C       the first four time steps.
 	RMU=1.0D-03
 	SIGMA=0.02					
         WE=1.0d+00						! jet
-	Re=10
+	Re=0
         IWRIT=0
           ITRACK=1
 	pn=1
@@ -240,13 +240,13 @@ c	end if
 
 Ccccccccccccc   Fixed boundary conditions.ccccccccccccccccccc
 C         a) b.c. at y=0, v=0.uy=0	
-	  DO I=NNXZ1*(NNYZ1+1)+(NNY+1)*(NNX1-2)+1,NHADD,NNY+1	
+c	  DO I=NNXZ1*(NNYZ1+1)+(NNY+1)*(NNX1-2)+1,NHADD,NNY+1	
 c	  DO I=(NNY+1)*(NNX1-1)+1,NHADD,NNY+1	
 c	  SOL(NOPP(I))=0.		
-	  SOL(NOPP(I)+1)=0.
+c	  SOL(NOPP(I)+1)=0.
 c	  NCOD(NOPP(I))=1	
-	  NCOD(NOPP(I)+1)=1
-	  END DO
+c	  NCOD(NOPP(I)+1)=1
+c	  END DO
 
 
 c         b)b.c. at x=xw, v=0, u=inlet.		
@@ -602,8 +602,8 @@ c           Do I=1, NNY, 1
           SOL(NOPP(I))=0.
 c          SOL(NOPP(I))=-AAA*(1-zzz*(wy(kk))**2)
           NCOD(NOPP(I))=1
-          SOL(NOPP(I)+1)=0.
-          NCOD(NOPP(I)+1)=1
+c          SOL(NOPP(I)+1)=0.
+c          NCOD(NOPP(I)+1)=1
           kk=kk+1
           END DO                !JK_OSCILATING_INLET
 
@@ -676,11 +676,11 @@ C       The global Jacobian matrix is built here:
 	  IF(NELL .LT. NE)GO TO 18
 	  write(69,561) NP
 c	Do i=1,NP 
-c	EQ(nopp(nny+1),i)=0				! forcing last two h equal
+c	EQ(NP,i)=0				! forcing last two h equal
 c	End Do
-c        EQ(nopp(nny+1),nopp(nny+1))=1
-c	EQ(nopp(nny+1),nopp(nny+2+nny))=-1
-c	R2(nopp(nny+1))=0
+c        EQ(NP,NP)=1
+c	EQ(NP,nopp(nhadd-nny-1))=-1
+c	R2(NP)=0
 C         **************************************************
 	  IR=0
 	  DO K=1,NP
@@ -736,6 +736,9 @@ C       NPM is the number of equations to be solved by GAUSSM.
 	write(69,524) NP,NPM
 	CALL GAUSSM(EQ,R2,NPM)
 	KS=NPM+1
+        if(ncod(1).NE.1)then    !JK FIX
+        temp=R2(1)              !JK FIX
+        end if                  !JKFIX
 	DO I=NP,1,-1
 	IF(NCOD(I) .NE. 1)THEN
 	KS=KS-1
@@ -743,6 +746,9 @@ C       NPM is the number of equations to be solved by GAUSSM.
 	R2(KS)=0.
 	END IF
 	END DO
+        if(ncod(1).ne.1)then !JK Fix
+        R2(1)=temp  !JK FIX
+        end if !JK FIX
 	RMS=0.
 	AMAXUP=0.
 	DO J=1,NP
@@ -812,7 +818,7 @@ c            call fida
 	    call CONTW
 	    end if
             IWRIT=IWRIT+1
-            IF(IWRIT.EQ.5.OR.IWRIT.EQ.1)then
+            IF(IWRIT.EQ.2.OR.IWRIT.EQ.1)then
             call shortpr
             IWRIT=1
             END IF
@@ -851,7 +857,7 @@ C 	*****************************************
         COMMON/GEN1/SOL(15999),W1(9),W2(9),W5(9),W3(4),W4(3)
 	COMMON/TEMP2/SOLV(15999),DSOL(15999)
         common/temf/solp(15999)
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
         COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME
 	
@@ -897,7 +903,7 @@ C 	*****************************************
         COMMON/GEN1/SOL(15999),W1(9),W2(9),W5(9),W3(4),W4(3)
 	COMMON/TEMP2/SOLV(15999),DSOL(15999)
         common/temf/solp(15999)
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
         COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME
 	
@@ -930,10 +936,10 @@ C Last modification 15-may-98
 	COMMON/FSLAB/IELFS(1700), IFZONE(1700)
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
 	COMMON/MESPA/XW,YW
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/ITER/ITE,MAXIT,RMS,RMSMAX,AMAXUP
 	COMMON/MESHCON/NEY,NEX,NEX1,NEX2
-	COMMON/MESHWT/WY(41),WX(171)
+	COMMON/MESHWT/WY(41),WX(180)
 	COMMON/FRON/NP,NH,NHADD,NE,NBN(1700),NCN(1700)
 	COMMON/FRON1/NELL
 	COMMON/FRON2/NOP(1700,12),NOPP(7182),MDF(7182)
@@ -941,7 +947,7 @@ C Last modification 15-may-98
         COMMON/INIT/epsilon,wno
 	INTEGER W1,W2,W3,W4
 	COMMON/PARAM/RE,F,OME,WE	! dimensionless parameter OME??
-	COMMON/NMESH/DIR(171,2)				!Added: Jun-2010 By: JK Store the sin and cos of the angle of each spine
+	COMMON/NMESH/DIR(180,2)				!Added: Jun-2010 By: JK Store the sin and cos of the angle of each spine
         COMMON/NONNEWPARA/alp,beta,pn 
         COMMON/ZMESH/wxz(15) !JKMoving
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1 !JKMoving
@@ -1271,10 +1277,10 @@ C 	Last modification 09-may-98
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
 	COMMON/MESCO/YPT(7011),XPT(7011)
 	COMMON/MESPA/XW,YW
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/MESHCON/NEY,NEX,NEX1,NEX2
-	COMMON/MESHWT/WY(41),WX(171)
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh 
+	COMMON/MESHWT/WY(41),WX(180)
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh 
         COMMON/NONNEWPARA/alp,beta,pn
         COMMON/ZMESH/wxz(15) !JKMoving
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1 !JKMoving
@@ -1360,7 +1366,7 @@ C	Last modification 09-may-98
         COMMON/GEN1/SOL(15999),W1(9),W2(9),W5(9),W3(4),W4(3)
 	COMMON/TEMP1/UV,VV,UPV,VPV,DYT1,DYT2,DXT1,DXT2,DYH(3)
 	COMMON/TEMP2/SOLV(15999),DSOL(15999)    !*V: previous solution
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1 !JKMoving
         COMMON/ZMESH/wxz(15) 
@@ -1452,7 +1458,7 @@ c	Last modification 09-may-98
 	COMMON/DERJA/DYEDH(3),DYCDH(3),DH(3),DHE(3),DHC(3)
         COMMON/DER1/AXPT(9),AYPT(9),WYL(3),DIRL(3,2),WXL(3)
 	COMMON/DER3/XE,XC,YC,YE,DET,Y			! modificado
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
 	DO I=1,3
 	  DH(I)=0.
@@ -1475,7 +1481,7 @@ C       *****************************************
 
 	IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 	COMMON/TFUN1/PHI(9),PSI(4),PHIC(9),PHIE(9),PHICC(9)
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
 	RL1(C)=2.*C**2-3.*C+1.
 	RL2(C)=4.*C-4.*C**2
@@ -1537,7 +1543,7 @@ C       *****************************************
 	DIMENSION BB(15999,15999),BS(15999),NO(15999)
 	DIMENSION NPIVOT(15999),NC(15999)
 	COMMON/FACT/IVUEL
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
 
         KV=0
@@ -1649,13 +1655,13 @@ C       ****************************************
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
         COMMON/GEN1/SOL(15999),W1(9),W2(9),W5(9),W3(4),W4(3)
 	COMMON/MESPA/XW,YW
-	COMMON/MESHWT/WY(41),WX(171)
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/MESHWT/WY(41),WX(180)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/FRON/NP,NH,NHADD,NE,NBN(1700),NCN(1700)
 	COMMON/FRON2/NOP(1700,12),NOPP(7182),MDF(7182)
         common/temp2/solv(12265),dsol(12265)
         common/temf/solp(15999)
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
 	INTEGER W1,W2,W3,W4
 C
@@ -1700,7 +1706,7 @@ C       **********************************
 	COMMON/MESCO/YPT(7011),XPT(7011)
 	COMMON/FRON/NP,NH,NHADD,NE,NBN(1700),NCN(1700)
         COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME
-	COMMON/NMESH/DIR(171,2)				!JK_new_mesh
+	COMMON/NMESH/DIR(180,2)				!JK_new_mesh
         COMMON/NONNEWPARA/alp,beta,pn 
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1
         COMMON/ZMESH/wxz(15) 
@@ -1871,18 +1877,18 @@ c	Last modification 03-Oct-2012-JK
 	COMMON/DERJA/DYEDH(3),DYCDH(3),DH(3),DHE(3),DHC(3) ! DYEDH DYCDH were previous auxilary variable, not needed now
 	COMMON/PARAM/RE,F,OME,WE
 	COMMON/FSLAB/IELFS(1700), IFZONE(1700)
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/MESH1/NNY,NNX,NNX1,NNX2
 	COMMON/MESCO/YPT(7011),XPT(7011)
 	COMMON/MESHCON/NEY,NEX,NEX1,NEX2
-	COMMON/MESHWT/WY(41),WX(171)
+	COMMON/MESHWT/WY(41),WX(180)
 	COMMON/FRON/NP,NH,NHADD,NE,NBN(1700),NCN(1700)
 	COMMON/FRON1/NELL
 	COMMON/FRON2/NOP(1700,12),NOPP(7182),MDF(7182)
 	COMMON/FRON3/A(25,25)
 	COMMON/TEMP1/UV,VV,UPV,VPV,DYT1,DYT2,DXT1,DXT2,DYH(3)
 	COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME
-	COMMON/NMESH/DIR(171,2)	!Added on Jun-2010 By:JK To store the sin and cos of each spine.
+	COMMON/NMESH/DIR(180,2)	!Added on Jun-2010 By:JK To store the sin and cos of each spine.
         COMMON/NONNEWPARA/alp,beta,pn !Added on Jun-2010 By:JK Parameters for the non-Newtonian fluid
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1 !JKMoving
         COMMON/ZMESH/wxz(15) !JKMoving
@@ -2724,7 +2730,7 @@ C     ensamble residuos globales
 	COMMON/MESCO/YPT(7011),XPT(7011)
         COMMON/MESH1/NNY,NNX,NNX1,NNX2                  !JK_new_mesh
         COMMON/MESHCON/NEY,NEX,NEX1,NEX2                !JK_new_mesh
-	COMMON/FSARRAY/H(171),BCP(171,2)
+	COMMON/FSARRAY/H(180),BCP(180,2)
 	COMMON/TEMP2/SOLV(15999),DSOL(15999)
 	COMMON/TEMP3/CT1,CT2,STEPT,TIME,TIMEF,STEPTV,NTIME  !moidified for continuation run: JK
         COMMON/ZONES/NEXZ1,NEYZ1,NEZ1,NNXZ1,NNYZ1
